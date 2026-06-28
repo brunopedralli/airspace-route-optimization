@@ -114,8 +114,8 @@ public class TemporalWeightedDigraph {
         sb.append("rankdir = LR;" + NEWLINE);
         sb.append("node [shape = circle];" + NEWLINE);
         for (Edge e : getEdges())
-            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%.3f\" %s]",
-                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight(), e.getColor())
+            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%.3f\"]",
+                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight())
                     + NEWLINE);
         sb.append("}" + NEWLINE);
         return sb.toString();
