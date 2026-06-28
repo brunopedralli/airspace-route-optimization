@@ -6,67 +6,62 @@ import java.util.Map;
 
 public class DijkstraSP {
 
-    private Map<String, Edge> edgeTo;
-    private Map<String, Double> distTo;
-    private IndexMinHeap<String, Double> pq;
+    private static final int INTERVAL_TIME = 45;
+    private static final int MAIN_HUBS_INTERVAL_TIME = 60;
 
-    public DijkstraSP(TemporalWeightedDigraph g, String s) {
+    private Map<Airfield, Edge> edgeTo;
+    private Map<Airfield, Double> distTo;
+    private IndexMinHeap<Airfield, Double> pq;
+
+    public DijkstraSP(TemporalWeightedDigraph g, Airfield s) {
         edgeTo = new HashMap<>();
         distTo = new HashMap<>();
         pq = new IndexMinHeap<>();
 
-        for (String v : g.getVerts())
+        for (Airfield v : g.getVerts())
             distTo.put(v, Double.POSITIVE_INFINITY);
         distTo.put(s, 0.0);
 
         pq.insert(s, 0.0);
         while (!pq.isEmpty()) {
-            String v = pq.delMin();
-            // System.out.println("Processando: " + v);
-            for (Edge e : g.getAdj(v)) {
+            Airfield v = pq.delMin();
+            for (Edge e : g.getAdj(v))
                 relax(e);
-            }
         }
     }
 
-    public boolean hasPathTo(String v) {
+    public boolean hasPathTo(Airfield v) {
         return distTo.get(v) != Double.POSITIVE_INFINITY;
-
     }
 
-    public double distTo(String v) {
+    public double distTo(Airfield v) {
         if (!hasPathTo(v))
-            throw new UnsupportedOperationException("Sem caminho para " + v + "!");
+            throw new UnsupportedOperationException("No path to " + v.getIcao() + "!");
         return distTo.get(v);
     }
 
-    public Iterable<Edge> pathTo(String v) {
+    public Iterable<Edge> pathTo(Airfield v) {
         LinkedList<Edge> path = new LinkedList<>();
         if (!hasPathTo(v))
             return path;
         Edge e = edgeTo.get(v);
-        // Enquanto não chegar na primeira aresta
         while (e != null) {
             path.addFirst(e);
-            // Próxima aresta começa no V da atual!
             e = edgeTo.get(e.getV());
         }
         return path;
     }
 
     private void relax(Edge e) {
-        String v = e.getV();
-        String w = e.getW();
+        Airfield v = e.getV();
+        Airfield w = e.getW();
         double edgeWeight = distTo.get(v) + e.getWeight();
         if (distTo.get(w) > edgeWeight) {
-            // Achei um caminho melhor!
             distTo.put(w, edgeWeight);
             edgeTo.put(w, e);
             if (!pq.contains(w))
-                // Não existe, insere na fila
                 pq.insert(w, edgeWeight);
             else
-                // Já existe, reduz a prioridade (valor)
                 pq.decreaseValue(w, edgeWeight);
         }
     }

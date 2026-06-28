@@ -1,4 +1,4 @@
-package model;
+package graph;
 
 public class Airfield {
 
@@ -56,6 +56,18 @@ public class Airfield {
 
     public double getLongitude() {
         return this.longitude;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Airfield)) return false;
+        return this.icao.equals(((Airfield) o).icao);
+    }
+
+    @Override
+    public int hashCode() {
+        return icao.hashCode();
     }
 
     @Override

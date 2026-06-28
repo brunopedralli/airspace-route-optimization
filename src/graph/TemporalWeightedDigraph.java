@@ -1,5 +1,8 @@
 package graph;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -7,34 +10,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.DataLoader;
 import io.In;
 
 public class TemporalWeightedDigraph {
-    protected static final String NEWLINE = System.getProperty("line.separator");
+    private static final String NEWLINE = System.getProperty("line.separator");
 
-    protected Map<String, List<Edge>> graph;
-    protected Set<String> vertices;
-    protected int totalVertices;
-    protected int totalEdges;
+    private Map<Airfield, List<Edge>> graph;
+    private Set<Airfield> vertices;
+    private int totalVertices;
+    private int totalEdges;
+
+    private DataLoader loader;
+    private Map<String, Airfield> airfields;
 
     public TemporalWeightedDigraph() {
-        graph = new HashMap<>();
-        vertices = new HashSet<>();
-        totalVertices = totalEdges = 0;
+        this.graph = new HashMap<>();
+        this.vertices = new HashSet<>();
+        this.totalVertices = totalEdges = 0;
+
+        loader = new DataLoader();
+        this.airfields = loader.loadAirfields("aerial_network_data/airfields.csv");
     }
 
     public TemporalWeightedDigraph(String filename) {
         this();
         In in = new In(filename);
-        String line;
+        String line = in.readLine();
+
         while ((line = in.readLine()) != null) {
-            String[] edge = line.trim().split("[ ]+");
-            addEdge(edge[0], edge[1], Double.parseDouble(edge[2]));
+            String[] edge = line.trim().replace("\"", "").split(",");
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+            LocalDateTime scheduledArrival = LocalDateTime.parse(edge[1], formatter);
+            LocalDateTime scheduledDeparture = LocalDateTime.parse(edge[2], formatter);
+            long minutesDiff = ChronoUnit.MINUTES.between(scheduledDeparture, scheduledArrival);
+
+            Airfield destinationAirfield = airfields.get(edge[9]);
+            Airfield originAirfield = airfields.get(edge[10]);
+
+            addEdge(originAirfield, destinationAirfield, minutesDiff);
         }
+
         in.close();
     }
 
-    public void addEdge(String v, String w, double weight) {
+    public void addEdge(Airfield v, Airfield w, long weight) {
         Edge e = new Edge(v, w, weight);
         addToList(v, e);
         if (!vertices.contains(v)) {
@@ -48,7 +69,27 @@ public class TemporalWeightedDigraph {
         totalEdges++;
     }
 
-    public Iterable<Edge> getAdj(String v) {
+    private List<Edge> addToList(Airfield v, Edge e) {
+        List<Edge> list = graph.get(v);
+        if (list == null)
+            list = new LinkedList<>();
+        list.add(e);
+        graph.put(v, list);
+        return list;
+    }
+
+    public Iterable<Edge> getEdges() {
+        Set<Edge> ed = new HashSet<>();
+        for (Airfield v : getVerts()) {
+            for (Edge e : getAdj(v)) {
+                if (!ed.contains(e))
+                    ed.add(e);
+            }
+        }
+        return ed;
+    }
+
+    public Iterable<Edge> getAdj(Airfield v) {
         List<Edge> res = graph.get(v);
         if (res == null)
             res = new LinkedList<>();
@@ -63,20 +104,8 @@ public class TemporalWeightedDigraph {
         return totalEdges;
     }
 
-    public Set<String> getVerts() {
+    public Set<Airfield> getVerts() {
         return vertices;
-    }
-
-    public Iterable<Edge> getEdges() {
-        Set<Edge> ed = new HashSet<>();
-        for (String v : getVerts().stream().sorted().toList()) {
-            for (Edge e : getAdj(v)) {
-                if (!ed.contains(e)) {
-                    ed.add(e);
-                }
-            }
-        }
-        return ed;
     }
 
     public String toDot() {
@@ -85,21 +114,10 @@ public class TemporalWeightedDigraph {
         sb.append("rankdir = LR;" + NEWLINE);
         sb.append("node [shape = circle];" + NEWLINE);
         for (Edge e : getEdges())
-            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%.3f\" %s]", e.getV(), e.getW(), e.getWeight(),
-                    e.getColor())
+            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%.3f\" %s]",
+                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight(), e.getColor())
                     + NEWLINE);
         sb.append("}" + NEWLINE);
         return sb.toString();
-    }
-
-    // Adiciona um vértice adjacente a outro, criando a lista
-    // de adjacências caso ainda não exista no dicionário
-    private List<Edge> addToList(String v, Edge e) {
-        List<Edge> list = graph.get(v);
-        if (list == null)
-            list = new LinkedList<>();
-        list.add(e);
-        graph.put(v, list);
-        return list;
     }
 }

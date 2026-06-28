@@ -1,28 +1,32 @@
 package graph;
 
 public class Edge implements Comparable<Edge> {
-    private String v;
-    private String w;
+    private Airfield v;
+    private Airfield w;
     private double weight;
     private String color;
 
-    public Edge(String v, String w, double weight) {
+    public Edge(Airfield v, Airfield w, double weight) {
         this.v = v;
         this.w = w;
         this.weight = weight;
         this.color = "";
     }
 
-    public String getV() {
+    public Airfield getV() {
         return v;
     }
 
-    public String getW() {
+    public Airfield getW() {
         return w;
     }
 
     public double getWeight() {
         return weight;
+    }
+
+    public String getColor() {
+        return color;
     }
 
     public void setWeight(double weight) {
@@ -33,10 +37,6 @@ public class Edge implements Comparable<Edge> {
         this.color = color;
     }
 
-    public String getColor() {
-        return color;
-    }
-
     @Override
     public int compareTo(Edge other) {
         return Double.compare(this.weight, other.weight);
@@ -44,6 +44,6 @@ public class Edge implements Comparable<Edge> {
 
     @Override
     public String toString() {
-        return v + "-" + w + " (" + weight + ")" + color;
+        return v.getIcao() + "-" + w.getIcao() + " (" + weight + ")" + color;
     }
 }
