@@ -1,3 +1,4 @@
+package graph;
 
 public class Edge implements Comparable<Edge> {
     private String v;
