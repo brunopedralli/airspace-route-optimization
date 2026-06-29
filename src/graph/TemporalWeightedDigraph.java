@@ -96,16 +96,22 @@ public class TemporalWeightedDigraph {
         return res;
     }
 
-    public int getTotalVerts() {
-        return totalVertices;
-    }
-
-    public int getTotalEdges() {
-        return totalEdges;
+    public int getConnections(Airfield v) {
+        List<Edge> edges = graph.get(v);
+        if (edges == null) return 0;
+        return edges.size();
     }
 
     public Set<Airfield> getVerts() {
-        return vertices;
+        return this.vertices;
+    }
+
+    public int getTotalVerts() {
+        return this.totalVertices;
+    }
+
+    public int getTotalEdges() {
+        return this.totalEdges;
     }
 
     public String toDot() {
