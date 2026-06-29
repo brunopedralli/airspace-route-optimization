@@ -75,6 +75,24 @@ public class TemporalWeightedDigraph {
         return list;
     }
 
+    public Airfield removeVertice(Airfield v) {
+        int edges = 0;
+        List<Edge> removed = graph.remove(v);
+        if (removed != null)
+            edges += removed.size();
+
+        for (List<Edge> list : graph.values()) {
+            int before = list.size();
+            list.removeIf(e -> e.getW().equals(v));
+            edges += before - list.size();
+        }
+
+        vertices.remove(v);
+        totalVertices--;
+        totalEdges -= edges;
+        return v;
+    }
+
     public Iterable<Edge> getEdges() {
         Set<Edge> ed = new HashSet<>();
         for (Airfield v : getVerts()) {
