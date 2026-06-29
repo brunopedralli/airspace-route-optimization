@@ -15,35 +15,32 @@ import io.In;
 
 public class TemporalWeightedDigraph {
     private static final String NEWLINE = System.getProperty("line.separator");
+    private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private Map<Airfield, List<Edge>> graph;
     private Set<Airfield> vertices;
     private int totalVertices;
     private int totalEdges;
 
-    private DataLoader loader;
-    private Map<String, Airfield> airfields;
-
     public TemporalWeightedDigraph() {
         this.graph = new HashMap<>();
         this.vertices = new HashSet<>();
         this.totalVertices = totalEdges = 0;
-
-        loader = new DataLoader();
-        this.airfields = loader.loadAirfields("aerial_network_data/airfields.csv");
     }
 
     public TemporalWeightedDigraph(String filename) {
         this();
+        DataLoader loader = new DataLoader();
+        Map<String, Airfield> airfields = loader.loadAirfields("aerial_network_data/airfields.csv");
+
         In in = new In(filename);
         String line = in.readLine();
 
         while ((line = in.readLine()) != null) {
             String[] edge = line.trim().replace("\"", "").split(",");
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-            LocalDateTime scheduledArrival = LocalDateTime.parse(edge[1], formatter);
-            LocalDateTime scheduledDeparture = LocalDateTime.parse(edge[2], formatter);
+            LocalDateTime scheduledArrival = LocalDateTime.parse(edge[1], DATETIME_FMT);
+            LocalDateTime scheduledDeparture = LocalDateTime.parse(edge[2], DATETIME_FMT);
             long minutesDiff = ChronoUnit.MINUTES.between(scheduledDeparture, scheduledArrival);
 
             Airfield destinationAirfield = airfields.get(edge[9]);
