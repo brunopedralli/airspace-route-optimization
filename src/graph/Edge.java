@@ -8,7 +8,7 @@ public class Edge implements Comparable<Edge> {
     private Airfield w;
     private LocalDateTime departure;
     private LocalDateTime arrival;
-    private double weight;
+    private long weight;
 
     public Edge(Airfield v, Airfield w, LocalDateTime departure, LocalDateTime arrival) {
         this.v = v;
@@ -34,13 +34,13 @@ public class Edge implements Comparable<Edge> {
         return arrival;
     }
 
-    public double getWeight() {
+    public long getWeight() {
         return weight;
     }
 
     @Override
     public int compareTo(Edge other) {
-        return Double.compare(this.weight, other.weight);
+        return Long.compare(this.weight, other.weight);
     }
 
     @Override

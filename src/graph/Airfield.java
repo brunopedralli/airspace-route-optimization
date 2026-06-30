@@ -60,8 +60,10 @@ public class Airfield {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Airfield)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof Airfield))
+            return false;
         return this.icao.equals(((Airfield) o).icao);
     }
 
