@@ -72,7 +72,7 @@ public class DijkstraSP {
         if (!e.getDeparture().toLocalDate().equals(travelDate))
             return;
 
-        int tmin = hubs.contains(v) ? MAIN_HUBS_INTERVAL_TIME : INTERVAL_TIME;
+        int tmin = edgeTo.containsKey(v) ? (hubs.contains(v) ? MAIN_HUBS_INTERVAL_TIME : INTERVAL_TIME) : 0;
         LocalDateTime departure = arrivalAtV.plus(tmin, ChronoUnit.MINUTES);
 
         if (e.getDeparture().isBefore(departure))

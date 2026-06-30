@@ -134,8 +134,8 @@ public class App {
             prev = e.getArrival();
         }
 
-        System.out.printf("\nTotal trip duration: %d min (%dh)\n",
-                totalMinutes, totalMinutes / 60);
+        System.out.printf("\nTotal trip duration: %d min (%dh %02dm)\n",
+                totalMinutes, totalMinutes / 60, totalMinutes % 60);
 
         in.close();
     }
