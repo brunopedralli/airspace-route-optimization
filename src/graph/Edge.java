@@ -1,14 +1,21 @@
 package graph;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 public class Edge implements Comparable<Edge> {
     private Airfield v;
     private Airfield w;
+    private LocalDateTime departure;
+    private LocalDateTime arrival;
     private double weight;
 
-    public Edge(Airfield v, Airfield w, double weight) {
+    public Edge(Airfield v, Airfield w, LocalDateTime departure, LocalDateTime arrival) {
         this.v = v;
         this.w = w;
-        this.weight = weight;
+        this.departure = departure;
+        this.arrival = arrival;
+        this.weight = ChronoUnit.MINUTES.between(departure, arrival);
     }
 
     public Airfield getV() {
@@ -19,12 +26,16 @@ public class Edge implements Comparable<Edge> {
         return w;
     }
 
-    public double getWeight() {
-        return weight;
+    public LocalDateTime getDeparture() {
+        return departure;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
+    public LocalDateTime getArrival() {
+        return arrival;
+    }
+
+    public double getWeight() {
+        return weight;
     }
 
     @Override

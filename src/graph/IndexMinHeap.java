@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-public class IndexMinHeap<Key, Value extends Comparable<Value>> {
+public class IndexMinHeap<Key, Value extends Comparable<? super Value>> {
 
     // Armazena um valor e a posição da chave correspondente no vetor
     private class ValuePos {

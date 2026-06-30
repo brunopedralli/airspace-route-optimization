@@ -2,7 +2,6 @@ package graph;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,19 +40,18 @@ public class TemporalWeightedDigraph {
 
             LocalDateTime scheduledArrival = LocalDateTime.parse(edge[1], DATETIME_FMT);
             LocalDateTime scheduledDeparture = LocalDateTime.parse(edge[2], DATETIME_FMT);
-            long minutesDiff = ChronoUnit.MINUTES.between(scheduledDeparture, scheduledArrival);
 
             Airfield destinationAirfield = airfields.get(edge[9]);
             Airfield originAirfield = airfields.get(edge[10]);
 
-            addEdge(originAirfield, destinationAirfield, minutesDiff);
+            addEdge(originAirfield, destinationAirfield, scheduledDeparture, scheduledArrival);
         }
 
         in.close();
     }
 
-    public void addEdge(Airfield v, Airfield w, long weight) {
-        Edge e = new Edge(v, w, weight);
+    public void addEdge(Airfield v, Airfield w, LocalDateTime departure, LocalDateTime arrival) {
+        Edge e = new Edge(v, w, departure, arrival);
         addToList(v, e);
         if (!vertices.contains(v)) {
             vertices.add(v);
@@ -95,7 +93,7 @@ public class TemporalWeightedDigraph {
 
     public List<Airfield> getMainHubs(int count) {
         Map<Airfield, Integer> degree = new HashMap<>();
-        
+
         for (List<Edge> list : graph.values()) {
             for (Edge e : list) {
                 degree.put(e.getV(), degree.getOrDefault(e.getV(), 0) + 1);
@@ -125,6 +123,14 @@ public class TemporalWeightedDigraph {
         if (res == null)
             res = new LinkedList<>();
         return res;
+    }
+
+    public Airfield findByIcao(String icao) {
+        for (Airfield v : vertices) {
+            if (v.getIcao().equalsIgnoreCase(icao))
+                return v;
+        }
+        return null;
     }
 
     public Set<Airfield> getVerts() {
