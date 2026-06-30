@@ -93,6 +93,22 @@ public class TemporalWeightedDigraph {
         return v;
     }
 
+    public List<Airfield> getMainHubs(int count) {
+        Map<Airfield, Integer> degree = new HashMap<>();
+        
+        for (List<Edge> list : graph.values()) {
+            for (Edge e : list) {
+                degree.put(e.getV(), degree.getOrDefault(e.getV(), 0) + 1);
+                degree.put(e.getW(), degree.getOrDefault(e.getW(), 0) + 1);
+            }
+        }
+
+        return degree.keySet().stream()
+                .sorted((a, b) -> degree.get(b) - degree.get(a))
+                .limit(count)
+                .toList();
+    }
+
     public Iterable<Edge> getEdges() {
         Set<Edge> ed = new HashSet<>();
         for (Airfield v : getVerts()) {
@@ -109,12 +125,6 @@ public class TemporalWeightedDigraph {
         if (res == null)
             res = new LinkedList<>();
         return res;
-    }
-
-    public int getConnections(Airfield v) {
-        List<Edge> edges = graph.get(v);
-        if (edges == null) return 0;
-        return edges.size();
     }
 
     public Set<Airfield> getVerts() {
