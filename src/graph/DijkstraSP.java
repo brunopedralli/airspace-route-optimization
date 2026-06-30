@@ -1,8 +1,12 @@
 package graph;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 public class DijkstraSP {
 
@@ -10,31 +14,36 @@ public class DijkstraSP {
     private static final int MAIN_HUBS_INTERVAL_TIME = 60;
 
     private Map<Airfield, Edge> edgeTo;
-    private Map<Airfield, Double> distTo;
-    private IndexMinHeap<Airfield, Double> pq;
+    private Map<Airfield, LocalDateTime> distTo;
+    private IndexMinHeap<Airfield, LocalDateTime> pq;
+    private Set<Airfield> hubs;
+    private LocalDate travelDate;
 
-    public DijkstraSP(TemporalWeightedDigraph g, Airfield s) {
-        edgeTo = new HashMap<>();
-        distTo = new HashMap<>();
-        pq = new IndexMinHeap<>();
+    public DijkstraSP(TemporalWeightedDigraph g, Airfield origin, Airfield destination,
+            LocalDateTime startTime, Set<Airfield> hubs) {
+        this.edgeTo = new HashMap<>();
+        this.distTo = new HashMap<>();
+        this.pq = new IndexMinHeap<>();
+        this.hubs = hubs;
+        this.travelDate = startTime.toLocalDate();
 
-        for (Airfield v : g.getVerts())
-            distTo.put(v, Double.POSITIVE_INFINITY);
-        distTo.put(s, 0.0);
+        distTo.put(origin, startTime);
+        pq.insert(origin, startTime);
 
-        pq.insert(s, 0.0);
         while (!pq.isEmpty()) {
             Airfield v = pq.delMin();
+            if (v.equals(destination))
+                break;
             for (Edge e : g.getAdj(v))
                 relax(e);
         }
     }
 
     public boolean hasPathTo(Airfield v) {
-        return distTo.get(v) != Double.POSITIVE_INFINITY;
+        return distTo.containsKey(v);
     }
 
-    public double distTo(Airfield v) {
+    public LocalDateTime distTo(Airfield v) {
         if (!hasPathTo(v))
             throw new UnsupportedOperationException("No path to " + v.getIcao() + "!");
         return distTo.get(v);
@@ -55,14 +64,28 @@ public class DijkstraSP {
     private void relax(Edge e) {
         Airfield v = e.getV();
         Airfield w = e.getW();
-        double edgeWeight = distTo.get(v) + e.getWeight();
-        if (distTo.get(w) > edgeWeight) {
-            distTo.put(w, edgeWeight);
+
+        LocalDateTime arrivalAtV = distTo.get(v);
+        if (arrivalAtV == null)
+            return;
+
+        if (!e.getDeparture().toLocalDate().equals(travelDate))
+            return;
+
+        int tmin = hubs.contains(v) ? MAIN_HUBS_INTERVAL_TIME : INTERVAL_TIME;
+        LocalDateTime departure = arrivalAtV.plus(tmin, ChronoUnit.MINUTES);
+
+        if (e.getDeparture().isBefore(departure))
+            return;
+
+        LocalDateTime arrivalAtW = e.getArrival();
+        if (!distTo.containsKey(w) || arrivalAtW.isBefore(distTo.get(w))) {
+            distTo.put(w, arrivalAtW);
             edgeTo.put(w, e);
             if (!pq.contains(w))
-                pq.insert(w, edgeWeight);
+                pq.insert(w, arrivalAtW);
             else
-                pq.decreaseValue(w, edgeWeight);
+                pq.decreaseValue(w, arrivalAtW);
         }
     }
 }
