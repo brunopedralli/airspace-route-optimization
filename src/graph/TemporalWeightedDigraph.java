@@ -169,15 +169,17 @@ public class TemporalWeightedDigraph {
         return aircrafts;
     }
 
-    public String toDot() {
+    public String toDot(Set<Edge> highlighted) {
         StringBuilder sb = new StringBuilder();
         sb.append("digraph {" + NEWLINE);
         sb.append("rankdir = LR;" + NEWLINE);
         sb.append("node [shape = circle];" + NEWLINE);
-        for (Edge e : getEdges())
-            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%d\"]",
-                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight())
+        for (Edge e : getEdges()) {
+            String color = highlighted.contains(e) ? " color=red" : "";
+            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%d\"%s]",
+                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight(), color)
                     + NEWLINE);
+        }
         sb.append("}" + NEWLINE);
         return sb.toString();
     }

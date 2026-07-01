@@ -123,6 +123,7 @@ public class App {
         List<Edge> path = (List<Edge>) sp.pathTo(destination);
         long totalMinutes = 0;
         LocalDateTime prev = startTime;
+        int count = 1;
 
         for (Edge e : path) {
             long wait = ChronoUnit.MINUTES.between(prev, e.getDeparture());
@@ -134,7 +135,8 @@ public class App {
             String companyName = company.getName();
             String aircraftModel = aircraft.getModel();
 
-            System.out.printf("%s -> %s | %s | flight %s%s | %s | dep: %s | arr: %s | flight: %d min | wait: %d min\n",
+            System.out.printf("%d - %s -> %s | %s | flight %s%s | %s | dep: %s | arr: %s | flight: %d min | wait: %d min\n",
+                    count,
                     e.getV().getIcao(), e.getW().getIcao(),
                     companyName, e.getCompanyIcao(),
                     e.getFlightNumber(), aircraftModel,
@@ -144,6 +146,7 @@ public class App {
 
             totalMinutes += wait + flight;
             prev = e.getArrival();
+            count++;
         }
 
         System.out.printf("\nTotal trip duration: %d min (%dh %02dm)\n",
@@ -153,7 +156,7 @@ public class App {
 
         Path outputFile = Path.of("graph.txt");
         try {
-            Files.writeString(outputFile, graph.toDot());
+            Files.writeString(outputFile, graph.toDot(new HashSet<>(path)));
         } catch (IOException e) {
             System.out.println("Failed to write DOT graph");
         }
