@@ -154,9 +154,9 @@ public class App {
 
         System.out.println("\n=============\n");
 
-        Path outputFile = Path.of("graph.txt");
         try {
-            Files.writeString(outputFile, graph.toDot(new HashSet<>(path)));
+            Files.writeString(Path.of("graph.txt"), graph.toDot(new HashSet<>(path)));
+            Files.writeString(Path.of("route.txt"), graph.pathToDot(path));
         } catch (IOException e) {
             System.out.println("Failed to write DOT graph");
         }

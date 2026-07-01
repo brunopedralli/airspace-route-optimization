@@ -183,4 +183,17 @@ public class TemporalWeightedDigraph {
         sb.append("}" + NEWLINE);
         return sb.toString();
     }
+
+    public String pathToDot(List<Edge> path) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("digraph {" + NEWLINE);
+        sb.append("rankdir = LR;" + NEWLINE);
+        sb.append("node [shape = circle];" + NEWLINE);
+        for (Edge e : path)
+            sb.append(String.format("\"%s\" -> \"%s\" [label=\"%d\" color=red]",
+                    e.getV().getIcao(), e.getW().getIcao(), e.getWeight())
+                    + NEWLINE);
+        sb.append("}" + NEWLINE);
+        return sb.toString();
+    }
 }
