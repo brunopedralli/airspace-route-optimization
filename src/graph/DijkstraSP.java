@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import model.Airfield;
+
 public class DijkstraSP {
 
     private static final int INTERVAL_TIME = 45;

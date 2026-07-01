@@ -1,4 +1,4 @@
-package graph;
+package model;
 
 public class Airfield {
 
