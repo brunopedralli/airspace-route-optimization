@@ -1,6 +1,5 @@
 package graph;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ public class DijkstraSP {
     private Map<Airfield, LocalDateTime> distTo;
     private IndexMinHeap<Airfield, LocalDateTime> pq;
     private Set<Airfield> hubs;
-    private LocalDate travelDate;
 
     public DijkstraSP(TemporalWeightedDigraph g, Airfield origin, Airfield destination,
             LocalDateTime startTime, Set<Airfield> hubs) {
@@ -27,7 +25,6 @@ public class DijkstraSP {
         this.distTo = new HashMap<>();
         this.pq = new IndexMinHeap<>();
         this.hubs = hubs;
-        this.travelDate = startTime.toLocalDate();
 
         distTo.put(origin, startTime);
         pq.insert(origin, startTime);
@@ -69,9 +66,6 @@ public class DijkstraSP {
 
         LocalDateTime arrivalAtV = distTo.get(v);
         if (arrivalAtV == null)
-            return;
-
-        if (!e.getDeparture().toLocalDate().equals(travelDate))
             return;
 
         int tmin = edgeTo.containsKey(v) ? (hubs.contains(v) ? MAIN_HUBS_INTERVAL_TIME : INTERVAL_TIME) : 0;
