@@ -11,6 +11,9 @@ import java.util.Set;
 
 import io.DataLoader;
 import io.In;
+import model.Airfield;
+import model.Aircraft;
+import model.Company;
 
 public class TemporalWeightedDigraph {
     private static final String NEWLINE = System.getProperty("line.separator");
@@ -21,9 +24,14 @@ public class TemporalWeightedDigraph {
     private int totalVertices;
     private int totalEdges;
 
+    private Map<String, Company> companies;
+    private Map<String, Aircraft> aircrafts;
+
     public TemporalWeightedDigraph() {
         this.graph = new HashMap<>();
         this.vertices = new HashSet<>();
+        this.companies = new HashMap<>();
+        this.aircrafts = new HashMap<>();
         this.totalVertices = totalEdges = 0;
     }
 
@@ -31,6 +39,8 @@ public class TemporalWeightedDigraph {
         this();
         DataLoader loader = new DataLoader();
         Map<String, Airfield> airfields = loader.loadAirfields("aerial_network_data/airfields.csv");
+        this.companies = loader.loadCompanies("aerial_network_data/companies.csv");
+        this.aircrafts = loader.loadAircrafts("aerial_network_data/aircrafts.csv");
 
         In in = new In(filename);
         String line = in.readLine();
@@ -41,17 +51,23 @@ public class TemporalWeightedDigraph {
             LocalDateTime scheduledArrival = LocalDateTime.parse(edge[1], DATETIME_FMT);
             LocalDateTime scheduledDeparture = LocalDateTime.parse(edge[2], DATETIME_FMT);
 
+            String flightNumber = edge[5].trim();
+            String companyIcao = edge[7].trim();
+            String aircraftIcao = edge[8].trim();
+
             Airfield destinationAirfield = airfields.get(edge[9]);
             Airfield originAirfield = airfields.get(edge[10]);
 
-            addEdge(originAirfield, destinationAirfield, scheduledDeparture, scheduledArrival);
+            addEdge(originAirfield, destinationAirfield, scheduledDeparture, scheduledArrival,
+                    companyIcao, flightNumber, aircraftIcao);
         }
 
         in.close();
     }
 
-    public void addEdge(Airfield v, Airfield w, LocalDateTime departure, LocalDateTime arrival) {
-        Edge e = new Edge(v, w, departure, arrival);
+    public void addEdge(Airfield v, Airfield w, LocalDateTime departure, LocalDateTime arrival,
+                        String companyIcao, String flightNumber, String aircraftIcao) {
+        Edge e = new Edge(v, w, departure, arrival, companyIcao, flightNumber, aircraftIcao);
         addToList(v, e);
         if (!vertices.contains(v)) {
             vertices.add(v);
@@ -143,6 +159,14 @@ public class TemporalWeightedDigraph {
 
     public int getTotalEdges() {
         return this.totalEdges;
+    }
+
+    public Map<String, Company> getCompanies() {
+        return companies;
+    }
+
+    public Map<String, Aircraft> getAircrafts() {
+        return aircrafts;
     }
 
     public String toDot() {
