@@ -1,18 +1,22 @@
 package main;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-import graph.Airfield;
 import graph.DijkstraSP;
 import graph.Edge;
 import graph.TemporalWeightedDigraph;
+import model.Aircraft;
+import model.Airfield;
+import model.Company;
 
 public class App {
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -21,7 +25,7 @@ public class App {
         Scanner in = new Scanner(System.in);
         TemporalWeightedDigraph graph = new TemporalWeightedDigraph("aerial_network_data/flights_mar2026.csv");
         List<Airfield> hubs = graph.getMainHubs(5);
-        
+
         System.out.println("Welcome to the Brazilian Airspace Routes System!");
         System.out.println("Developed by: Bruno Pedralli");
         System.out.println("\n=============\n");
@@ -40,8 +44,6 @@ public class App {
             if (choice != 0 && choice != 1)
                 System.out.print("Invalid choice. Please, select again: ");
         } while (choice != 0 && choice != 1);
-
-        System.out.println();
 
         if (choice == 1) {
             System.out.print("Wonderful! Now, type the number of the one you want to remove (based on the list above): ");
@@ -125,17 +127,36 @@ public class App {
         for (Edge e : path) {
             long wait = ChronoUnit.MINUTES.between(prev, e.getDeparture());
             long flight = e.getWeight();
-            System.out.printf("%s -> %s | departure: %s | arrival: %s | flight: %d min | wait: %d min\n",
+
+            Company company = graph.getCompanies().get(e.getCompanyIcao());
+            Aircraft aircraft = graph.getAircrafts().get(e.getAircraftIcao());
+
+            String companyName = company.getName();
+            String aircraftModel = aircraft.getModel();
+
+            System.out.printf("%s -> %s | %s | flight %s%s | %s | dep: %s | arr: %s | flight: %d min | wait: %d min\n",
                     e.getV().getIcao(), e.getW().getIcao(),
+                    companyName, e.getCompanyIcao(),
+                    e.getFlightNumber(), aircraftModel,
                     e.getDeparture().format(DATETIME_FMT),
                     e.getArrival().format(DATETIME_FMT),
                     flight, wait);
+
             totalMinutes += wait + flight;
             prev = e.getArrival();
         }
 
         System.out.printf("\nTotal trip duration: %d min (%dh %02dm)\n",
                 totalMinutes, totalMinutes / 60, totalMinutes % 60);
+
+        System.out.println("\n=============\n");
+
+        Path outputFile = Path.of("graph.txt");
+        try {
+            Files.writeString(outputFile, graph.toDot());
+        } catch (IOException e) {
+            System.out.println("Failed to write DOT graph");
+        }
 
         in.close();
     }
